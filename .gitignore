@@ -1,0 +1,6 @@
+hzmind/out/
+hzmind.log
+.hzmignore
+
+.env
+.DS_Store
