@@ -23,47 +23,95 @@ go get github.com/thxrsxm/rnbw
 ```go
 package main
 
-import "github.com/thxrsxm/rnbw"
+import (
+	"fmt"
+
+	"github.com/thxrsxm/rnbw"
+)
 
 func main() {
-    // Print colored text (foreground)
-    rnbw.Println(rnbw.Green, "Success!")
-    rnbw.Println(rnbw.Red, "Error!")
-    
-    // Print with background color
-    rnbw.BgPrintln(rnbw.Yellow, "Warning background")
-    
-    // Combine foreground and background
-    rnbw.StyledPrintln(rnbw.White, rnbw.Red, "White text on red background")
-    
-    // Format and color
-    rnbw.Printf(rnbw.Blue, "Hello, %s!\n", "World")
-    rnbw.StyledPrintf(rnbw.Yellow, rnbw.Blue, "Score: %d\n", 100)
-    
-    // Get colored strings
-    message := rnbw.String(rnbw.Yellow, "Warning")
-    styled := rnbw.StyledString(rnbw.Green, rnbw.White, "Success!")
-    
-    // Set persistent colors
-    rnbw.ForegroundColor(rnbw.Cyan)
-    fmt.Println("This text is cyan")
-    rnbw.BackgroundColor(rnbw.Blue)
-    fmt.Println("This has a blue background")
-    rnbw.resetColor()
+	// Foreground colors
+	rnbw.Println(rnbw.Green, "Success!")
+	rnbw.Println(rnbw.Red, "Error!")
+	rnbw.Printf(rnbw.Blue, "Hello, %s!\n", "World")
+	fmt.Println()
+
+	// Background colors
+	rnbw.BgPrintln(rnbw.Yellow, "Warning background")
+	fmt.Println()
+
+	// Combined foreground and background
+	rnbw.StyledPrintln(rnbw.Gray, rnbw.Red, "Gray text on red background")
+	fmt.Println()
+	rnbw.StyledPrintf(rnbw.Yellow, rnbw.Blue, "Score: %d", 100)
+	fmt.Println()
 }
 ```
 
+## API
+
+### String Builders
+
+Return colored strings without printing.
+
+| Function | Description |
+|---|---|
+| `String(c, s)` | Foreground colored string |
+| `Stringf(c, f, a...)` | Formatted foreground colored string |
+| `BgString(c, s)` | Background colored string |
+| `BgStringf(c, f, a...)` | Formatted background colored string |
+| `StyledString(fg, bg, s)` | Foreground + background colored string |
+| `StyledStringf(fg, bg, f, a...)` | Formatted foreground + background colored string |
+
+### Print to stdout
+
+| Function | Description |
+|---|---|
+| `Print(c, s)` | Print with foreground color |
+| `Println(c, s)` | Print with foreground color + newline |
+| `Printf(c, f, a...)` | Formatted print with foreground color |
+| `BgPrint(c, s)` | Print with background color |
+| `BgPrintln(c, s)` | Print with background color + newline |
+| `BgPrintf(c, f, a...)` | Formatted print with background color |
+| `StyledPrint(fg, bg, s)` | Print with foreground + background |
+| `StyledPrintln(fg, bg, s)` | Print with foreground + background + newline |
+| `StyledPrintf(fg, bg, f, a...)` | Formatted print with foreground + background |
+
+### Print to io.Writer
+
+| Function | Description |
+|---|---|
+| `Fprint(w, c, s)` | Write with foreground color |
+| `Fprintln(w, c, s)` | Write with foreground color + newline |
+| `Fprintf(w, c, f, a...)` | Formatted write with foreground color |
+| `BgFprint(w, c, s)` | Write with background color |
+| `BgFprintln(w, c, s)` | Write with background color + newline |
+| `BgFprintf(w, c, f, a...)` | Formatted write with background color |
+| `StyledFprint(w, fg, bg, s)` | Write with foreground + background |
+| `StyledFprintln(w, fg, bg, s)` | Write with foreground + background + newline |
+| `StyledFprintf(w, fg, bg, f, a...)` | Formatted write with foreground + background |
+
+### Persistent Colors
+
+| Function | Description |
+|---|---|
+| `ForegroundColor(c)` | Set persistent foreground color |
+| `BackgroundColor(c)` | Set persistent background color |
+| `ResetColor()` | Reset to default terminal colors |
+
 ## Available Colors
 
-- Reset - Reset to default
-- Red
-- Green
-- Yellow
-- Blue
-- Purple
-- Cyan
-- White
-- Gray
+| Color | Constant |
+|---|---|
+| Reset | `rnbw.Reset` |
+| Red | `rnbw.Red` |
+| Green | `rnbw.Green` |
+| Yellow | `rnbw.Yellow` |
+| Blue | `rnbw.Blue` |
+| Purple | `rnbw.Purple` |
+| Cyan | `rnbw.Cyan` |
+| White | `rnbw.White` |
+| Gray | `rnbw.Gray` |
 
 ## License
 

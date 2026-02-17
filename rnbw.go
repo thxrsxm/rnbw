@@ -1,6 +1,10 @@
 package rnbw
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"os"
+)
 
 // Color represents a terminal color code for ANSI-colored output.
 type Color int
@@ -18,13 +22,14 @@ const (
 	Gray                // Gray text color.
 )
 
+// resetColorCode represents the terminal reset color code.
 const resetColorCode = "\033[0m"
 
 // getFgColorCode returns the ANSI escape sequence for the given foreground color.
 func getFgColorCode(c Color) string {
 	switch c {
 	case Reset:
-		return "\033[0m"
+		return resetColorCode
 	case Red:
 		return "\033[31m"
 	case Green:
@@ -47,10 +52,11 @@ func getFgColorCode(c Color) string {
 	}
 }
 
+// getBgColorCode returns the ANSI escape sequence for the given background color.
 func getBgColorCode(c Color) string {
 	switch c {
 	case Reset:
-		return "\033[0m"
+		return resetColorCode
 	case Red:
 		return "\033[41m"
 	case Green:
@@ -73,41 +79,51 @@ func getBgColorCode(c Color) string {
 	}
 }
 
-// String returns the given string wrapped with ANSI color codes.
+// --- Foreground string builders ---
+
+// String returns the given string wrapped with foreground ANSI color codes.
 func String(c Color, s string) string {
 	return getFgColorCode(c) + s + resetColorCode
 }
 
-// Stringf returns a formatted string wrapped with ANSI color codes.
-// It behaves like fmt.Sprintf but adds color to the result.
+// Stringf returns a formatted string wrapped with foreground ANSI color codes.
 func Stringf(c Color, f string, a ...any) string {
 	return String(c, fmt.Sprintf(f, a...))
 }
 
-// Print prints a colored string to standard output.
-// It returns the number of bytes written and any write error encountered.
-func Print(c Color, s string) (n int, err error) {
-	return fmt.Print(String(c, s))
+// --- Foreground print functions ---
+
+// Fprint writes a colored string to the given writer.
+func Fprint(w io.Writer, c Color, s string) (int, error) {
+	return fmt.Fprint(w, String(c, s))
 }
 
-// Println prints a colored string to standard output followed by a newline.
-// It returns the number of bytes written and any write error encountered.
-func Println(c Color, s string) (n int, err error) {
-	return fmt.Println(String(c, s))
+// Fprintln writes a colored string followed by a newline to the given writer.
+func Fprintln(w io.Writer, c Color, s string) (int, error) {
+	return fmt.Fprintln(w, String(c, s))
+}
+
+// Fprintf writes a formatted colored string to the given writer.
+func Fprintf(w io.Writer, c Color, f string, a ...any) (int, error) {
+	return fmt.Fprint(w, Stringf(c, f, a...))
+}
+
+// Print prints a colored string to standard output.
+func Print(c Color, s string) (int, error) {
+	return Fprint(os.Stdout, c, s)
+}
+
+// Println prints a colored string followed by a newline to standard output.
+func Println(c Color, s string) (int, error) {
+	return Fprintln(os.Stdout, c, s)
 }
 
 // Printf prints a formatted colored string to standard output.
-// It behaves like fmt.Printf but adds color to the output.
-// It returns the number of bytes written and any write error encountered.
-func Printf(c Color, f string, a ...any) (n int, err error) {
-	return fmt.Print(Stringf(c, f, a...))
+func Printf(c Color, f string, a ...any) (int, error) {
+	return Fprintf(os.Stdout, c, f, a...)
 }
 
-// ForegroundColor sets the terminal's foreground color to the specified color.
-// The color persists until ResetColor is called or the terminal is reset.
-func ForgroundColor(c Color) {
-	fmt.Print(getFgColorCode(c))
-}
+// --- Background string builders ---
 
 // BgString returns the given string with a colored background.
 func BgString(c Color, s string) string {
@@ -115,35 +131,43 @@ func BgString(c Color, s string) string {
 }
 
 // BgStringf returns a formatted string with a colored background.
-// It behaves like fmt.Sprintf but adds a background color to the result.
 func BgStringf(c Color, f string, a ...any) string {
 	return BgString(c, fmt.Sprintf(f, a...))
 }
 
-// BgPrint prints a string with a colored background to standard output.
-// It returns the number of bytes written and any write error encountered.
-func BgPrint(c Color, s string) (n int, err error) {
-	return fmt.Print(BgString(c, s))
+// --- Background print functions ---
+
+// BgFprint writes a string with a colored background to the given writer.
+func BgFprint(w io.Writer, c Color, s string) (int, error) {
+	return fmt.Fprint(w, BgString(c, s))
 }
 
-// BgPrintln prints a string with a colored background to standard output followed by a newline.
-// It returns the number of bytes written and any write error encountered.
-func BgPrintln(c Color, s string) (n int, err error) {
-	return fmt.Println(BgString(c, s))
+// BgFprintln writes a string with a colored background followed by a newline to the given writer.
+func BgFprintln(w io.Writer, c Color, s string) (int, error) {
+	return fmt.Fprintln(w, BgString(c, s))
+}
+
+// BgFprintf writes a formatted string with a colored background to the given writer.
+func BgFprintf(w io.Writer, c Color, f string, a ...any) (int, error) {
+	return fmt.Fprint(w, BgStringf(c, f, a...))
+}
+
+// BgPrint prints a string with a colored background to standard output.
+func BgPrint(c Color, s string) (int, error) {
+	return BgFprint(os.Stdout, c, s)
+}
+
+// BgPrintln prints a string with a colored background followed by a newline to standard output.
+func BgPrintln(c Color, s string) (int, error) {
+	return BgFprintln(os.Stdout, c, s)
 }
 
 // BgPrintf prints a formatted string with a colored background to standard output.
-// It behaves like fmt.Printf but adds a background color to the output.
-// It returns the number of bytes written and any write error encountered.
-func BgPrintf(c Color, f string, a ...any) (n int, err error) {
-	return fmt.Print(BgStringf(c, f, a...))
+func BgPrintf(c Color, f string, a ...any) (int, error) {
+	return BgFprintf(os.Stdout, c, f, a...)
 }
 
-// BackgroundColor sets the terminal's background color to the specified color.
-// The color persists until ResetColor is called or the terminal is reset.
-func BackgroundColor(c Color) {
-	fmt.Print(getBgColorCode(c))
-}
+// --- Styled string builders ---
 
 // StyledString returns a string with both foreground and background colors.
 func StyledString(fg Color, bg Color, s string) string {
@@ -155,19 +179,50 @@ func StyledStringf(fg Color, bg Color, f string, a ...any) string {
 	return StyledString(fg, bg, fmt.Sprintf(f, a...))
 }
 
-// StyledPrint prints a string with both foreground and background colors.
-func StyledPrint(fg Color, bg Color, s string) (n int, err error) {
-	return fmt.Print(StyledString(fg, bg, s))
+// --- Styled print functions ---
+
+// StyledFprint writes a string with both foreground and background colors to the given writer.
+func StyledFprint(w io.Writer, fg Color, bg Color, s string) (int, error) {
+	return fmt.Fprint(w, StyledString(fg, bg, s))
 }
 
-// StyledPrintln prints a string with both foreground and background colors followed by a newline.
-func StyledPrintln(fg Color, bg Color, s string) (n int, err error) {
-	return fmt.Println(StyledString(fg, bg, s))
+// StyledFprintln writes a string with both foreground and background colors followed by a newline to the given writer.
+func StyledFprintln(w io.Writer, fg Color, bg Color, s string) (int, error) {
+	return fmt.Fprintln(w, StyledString(fg, bg, s))
 }
 
-// StyledPrintf prints a formatted string with both foreground and background colors.
-func StyledPrintf(fg Color, bg Color, f string, a ...any) (n int, err error) {
-	return fmt.Print(StyledStringf(fg, bg, f, a...))
+// StyledFprintf writes a formatted string with both foreground and background colors to the given writer.
+func StyledFprintf(w io.Writer, fg Color, bg Color, f string, a ...any) (int, error) {
+	return fmt.Fprint(w, StyledStringf(fg, bg, f, a...))
+}
+
+// StyledPrint prints a string with both foreground and background colors to standard output.
+func StyledPrint(fg Color, bg Color, s string) (int, error) {
+	return StyledFprint(os.Stdout, fg, bg, s)
+}
+
+// StyledPrintln prints a string with both foreground and background colors followed by a newline to standard output.
+func StyledPrintln(fg Color, bg Color, s string) (int, error) {
+	return StyledFprintln(os.Stdout, fg, bg, s)
+}
+
+// StyledPrintf prints a formatted string with both foreground and background colors to standard output.
+func StyledPrintf(fg Color, bg Color, f string, a ...any) (int, error) {
+	return StyledFprintf(os.Stdout, fg, bg, f, a...)
+}
+
+// --- Persistent color functions ---
+
+// ForegroundColor sets the terminal's foreground color to the specified color.
+// The color persists until ResetColor is called or the terminal is reset.
+func ForegroundColor(c Color) {
+	fmt.Print(getFgColorCode(c))
+}
+
+// BackgroundColor sets the terminal's background color to the specified color.
+// The color persists until ResetColor is called or the terminal is reset.
+func BackgroundColor(c Color) {
+	fmt.Print(getBgColorCode(c))
 }
 
 // ResetColor resets the terminal's foreground and background color to the default.
